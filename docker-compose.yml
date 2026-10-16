@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: textil_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-textil_db}
+      POSTGRES_USER: ${POSTGRES_USER:-textil_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-textil_secret_pass}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-textil_user} -d ${POSTGRES_DB:-textil_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: textil_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-textil_user}:${POSTGRES_PASSWORD:-textil_secret_pass}@postgres:5432/${POSTGRES_DB:-textil_db}
+      SECRET_KEY: ${SECRET_KEY:-textil_super_secret_jwt_key_2026_change_in_prod}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 1440
+      FIRST_SUPERUSER_EMAIL: admin@textilapp.com
+      FIRST_SUPERUSER_PASSWORD: admin123
+      FIRST_SUPERUSER_NOMBRE: Administrador Principal
+      CORS_ORIGINS: '["*"]'
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: textil_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:

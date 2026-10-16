@@ -22,6 +22,14 @@ from app.schemas.producto import (
     ProductoUpdate,
     ProductoOut,
 )
+from app.schemas.pedido import (
+    LineaPedidoCreate,
+    LineaPedidoOut,
+    HistorialPedidoOut,
+    PedidoCreate,
+    CambioEstadoPedido,
+    PedidoOut,
+)
 
 __all__ = [
     "LoginRequest",
@@ -42,4 +50,10 @@ __all__ = [
     "ProductoCreate",
     "ProductoUpdate",
     "ProductoOut",
+    "LineaPedidoCreate",
+    "LineaPedidoOut",
+    "HistorialPedidoOut",
+    "PedidoCreate",
+    "CambioEstadoPedido",
+    "PedidoOut",
 ]

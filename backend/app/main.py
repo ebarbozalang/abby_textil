@@ -10,6 +10,7 @@ from app.models.usuario import Usuario, RolUsuario
 from app.models.trabajador import Trabajador
 from app.models.cliente import Cliente
 from app.models.producto import Producto, Variante
+from app.models.pedido import Pedido, LineaPedido, HistorialPedido
 from app.api.v1.router import api_router
 
 

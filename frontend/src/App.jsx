@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import Catalogo from './pages/Catalogo';
+import Pedidos from './pages/Pedidos';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
 
@@ -87,17 +88,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/catalogo" element={<Catalogo />} />
-          <Route
-            path="/pedidos"
-            element={
-              <PlaceholderModule
-                title="Ventas & Pedidos"
-                week="3"
-                desc="Creación de pedidos bajo pedido, cálculo de anticipo obligatorio (30%) y códigos de rastreo único."
-                icon="🛍️"
-              />
-            }
-          />
+          <Route path="/pedidos" element={<Pedidos />} />
           <Route
             path="/produccion"
             element={

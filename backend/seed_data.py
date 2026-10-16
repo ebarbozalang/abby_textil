@@ -124,5 +124,91 @@ async def seed_semana_2():
         await session.commit()
         print("[OK] Datos iniciales de Clientes y Catálogo sembrados exitosamente.")
 
+        # 3. Pedidos de Demostración con Códigos de Rastreo Único
+        from app.models.pedido import Pedido, LineaPedido, HistorialPedido, EstadoPedido
+        from app.models.usuario import Usuario
+
+        # Obtener vendedor admin
+        user_vendedor = (await session.execute(select(Usuario))).scalars().first()
+        cliente_1 = (await session.execute(select(Cliente).where(Cliente.documento == "901234567-8"))).scalar_one_or_none()
+        cliente_2 = (await session.execute(select(Cliente).where(Cliente.documento == "900876543-2"))).scalar_one_or_none()
+        variante_cam = (await session.execute(select(Variante).where(Variante.sku_unico.like("CAMOXF%")))).scalars().first()
+        variante_conj = (await session.execute(select(Variante).where(Variante.sku_unico.like("CONJDEPDAM%")))).scalars().first()
+
+        pedidos_existentes = (await session.execute(select(Pedido))).scalars().all()
+        if not pedidos_existentes and cliente_1 and cliente_2 and variante_cam and variante_conj and user_vendedor:
+            # Pedido 1: Confirmado con 50% anticipo
+            p1 = Pedido(
+                cliente_id=cliente_1.id,
+                vendedor_id=user_vendedor.id,
+                estado=EstadoPedido.CONFIRMADO,
+                subtotal=Decimal("1500000.00"),
+                descuento=Decimal("0.00"),
+                total=Decimal("1500000.00"),
+                anticipo=Decimal("750000.00"),
+                saldo_pendiente=Decimal("750000.00"),
+                notas="Dotación ejecutiva para personal de ventas",
+            )
+            session.add(p1)
+            await session.flush()
+
+            linea1 = LineaPedido(
+                pedido_id=p1.id,
+                variante_id=variante_cam.id,
+                cantidad=20,
+                precio_unitario=Decimal("75000.00"),
+                subtotal=Decimal("1500000.00"),
+                estado_produccion="pendiente_corte",
+                codigo_rastreo_unico=LineaPedido.generar_codigo_rastreo(p1.id, variante_cam.sku_unico, 1),
+            )
+            session.add(linea1)
+
+            h1 = HistorialPedido(
+                pedido_id=p1.id,
+                usuario_id=user_vendedor.id,
+                estado_anterior=None,
+                estado_nuevo=EstadoPedido.CONFIRMADO.value,
+                observacion="Pedido registrado con 50% de anticipo ($750.000)",
+            )
+            session.add(h1)
+
+            # Pedido 2: En Corte con 40% anticipo
+            p2 = Pedido(
+                cliente_id=cliente_2.id,
+                vendedor_id=user_vendedor.id,
+                estado=EstadoPedido.PENDIENTE_CORTE,
+                subtotal=Decimal("2400000.00"),
+                descuento=Decimal("0.00"),
+                total=Decimal("2400000.00"),
+                anticipo=Decimal("960000.00"),
+                saldo_pendiente=Decimal("1440000.00"),
+                notas="Conjuntos deportivos para club atlético",
+            )
+            session.add(p2)
+            await session.flush()
+
+            linea2 = LineaPedido(
+                pedido_id=p2.id,
+                variante_id=variante_conj.id,
+                cantidad=20,
+                precio_unitario=Decimal("120000.00"),
+                subtotal=Decimal("2400000.00"),
+                estado_produccion="pendiente_corte",
+                codigo_rastreo_unico=LineaPedido.generar_codigo_rastreo(p2.id, variante_conj.sku_unico, 1),
+            )
+            session.add(linea2)
+
+            h2 = HistorialPedido(
+                pedido_id=p2.id,
+                usuario_id=user_vendedor.id,
+                estado_anterior="confirmado",
+                estado_nuevo=EstadoPedido.PENDIENTE_CORTE.value,
+                observacion="Aprobado y enviado a orden de corte",
+            )
+            session.add(h2)
+
+            await session.commit()
+            print("[OK] Pedidos de demostración sembrados con trazabilidad y códigos de rastreo único.")
+
 if __name__ == "__main__":
     asyncio.run(seed_semana_2())

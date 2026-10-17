@@ -16,6 +16,7 @@ import Pedidos from './pages/Pedidos';
 import Produccion from './pages/Produccion';
 import Trabajadores from './pages/Trabajadores';
 import Tesoreria from './pages/Tesoreria';
+import Reportes from './pages/Reportes';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
 

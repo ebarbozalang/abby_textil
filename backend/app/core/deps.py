@@ -60,16 +60,24 @@ def require_role(*allowed_roles: RolUsuario) -> Callable:
     """
     Decorador / Dependencia de FastAPI para verificar permisos de rol.
     Los superusuarios siempre tienen permiso concedido a todos los endpoints.
+    Acepta tanto argumentos sueltos require_role(Rol.A, Rol.B) como listas require_role([Rol.A, Rol.B]).
     """
+    roles = []
+    for r in allowed_roles:
+        if isinstance(r, (list, tuple, set)):
+            roles.extend(r)
+        else:
+            roles.append(r)
+
     async def role_checker(current_user: Usuario = Depends(get_current_user)) -> Usuario:
         # Superusuario tiene acceso total
         if current_user.rol == RolUsuario.SUPERUSUARIO:
             return current_user
 
-        if current_user.rol not in allowed_roles:
+        if current_user.rol not in roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Permiso denegado. Se requiere uno de los roles: {[r.value for r in allowed_roles]}",
+                detail=f"Permiso denegado. Se requiere uno de los roles: {[r.value if hasattr(r, 'value') else str(r) for r in roles]}",
             )
         return current_user
 

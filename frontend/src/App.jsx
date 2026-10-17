@@ -15,6 +15,7 @@ import Catalogo from './pages/Catalogo';
 import Pedidos from './pages/Pedidos';
 import Produccion from './pages/Produccion';
 import Trabajadores from './pages/Trabajadores';
+import Tesoreria from './pages/Tesoreria';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
 
@@ -93,17 +94,7 @@ export default function App() {
           <Route path="/pedidos" element={<Pedidos />} />
           <Route path="/produccion" element={<Produccion />} />
           <Route path="/trabajadores" element={<Trabajadores />} />
-          <Route
-            path="/tesoreria"
-            element={
-              <PlaceholderModule
-                title="Tesorería & Cuentas por Cobrar"
-                week="6"
-                desc="Registro de pagos, abonos en cuotas a créditos y flujo de caja diario."
-                icon="💳"
-              />
-            }
-          />
+          <Route path="/tesoreria" element={<Tesoreria />} />
           <Route
             path="/reportes"
             element={

@@ -51,6 +51,16 @@ from app.schemas.trabajador import (
     LiquidarNominaRequest,
     NominaOut,
 )
+from app.schemas.tesoreria import (
+    PagoCreate,
+    PagoOut,
+    AbonoCreditoCreate,
+    AbonoCreditoOut,
+    MetodoResumen,
+    MovimientoCajaItem,
+    CierreCajaOut,
+    CuentaPorCobrarOut,
+)
 
 __all__ = [
     "LoginRequest",
@@ -94,4 +104,12 @@ __all__ = [
     "ProduccionDiariaOut",
     "LiquidarNominaRequest",
     "NominaOut",
+    "PagoCreate",
+    "PagoOut",
+    "AbonoCreditoCreate",
+    "AbonoCreditoOut",
+    "MetodoResumen",
+    "MovimientoCajaItem",
+    "CierreCajaOut",
+    "CuentaPorCobrarOut",
 ]

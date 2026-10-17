@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 horas
 
     # Base de Datos (Async: PostgreSQL o SQLite)
-    DATABASE_URL: str = "sqlite+aiosqlite:///./textil_app.db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:123456@127.0.0.1:5432/textil_app"
 
     # CORS
     CORS_ORIGINS: Union[List[str], str] = ["*"]

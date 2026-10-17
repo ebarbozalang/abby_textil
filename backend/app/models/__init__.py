@@ -4,6 +4,14 @@ from app.models.trabajador import Trabajador, TipoPago
 from app.models.cliente import Cliente
 from app.models.producto import Producto, TipoProducto, Variante
 from app.models.pedido import Pedido, EstadoPedido, LineaPedido, HistorialPedido
+from app.models.produccion import (
+    OrdenCorte,
+    OrdenImpresion,
+    OrdenConfeccion,
+    TecnicaImpresion,
+    EtapaImpresion,
+    EstadoEtapaProduccion,
+)
 
 __all__ = [
     "Base",
@@ -19,4 +27,10 @@ __all__ = [
     "EstadoPedido",
     "LineaPedido",
     "HistorialPedido",
+    "OrdenCorte",
+    "OrdenImpresion",
+    "OrdenConfeccion",
+    "TecnicaImpresion",
+    "EtapaImpresion",
+    "EstadoEtapaProduccion",
 ]

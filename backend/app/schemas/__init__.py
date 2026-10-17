@@ -30,6 +30,17 @@ from app.schemas.pedido import (
     CambioEstadoPedido,
     PedidoOut,
 )
+from app.schemas.produccion import (
+    OrdenCorteCreate,
+    OrdenCorteOut,
+    OrdenImpresionCreate,
+    OrdenImpresionOut,
+    OrdenConfeccionCreate,
+    OrdenConfeccionOut,
+    TableroProduccionOut,
+    EscanearQrRequest,
+    EscanearQrResponse,
+)
 
 __all__ = [
     "LoginRequest",
@@ -56,4 +67,13 @@ __all__ = [
     "PedidoCreate",
     "CambioEstadoPedido",
     "PedidoOut",
+    "OrdenCorteCreate",
+    "OrdenCorteOut",
+    "OrdenImpresionCreate",
+    "OrdenImpresionOut",
+    "OrdenConfeccionCreate",
+    "OrdenConfeccionOut",
+    "TableroProduccionOut",
+    "EscanearQrRequest",
+    "EscanearQrResponse",
 ]

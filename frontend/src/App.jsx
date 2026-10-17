@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import Clientes from './pages/Clientes';
 import Catalogo from './pages/Catalogo';
 import Pedidos from './pages/Pedidos';
+import Produccion from './pages/Produccion';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
 
@@ -89,17 +90,7 @@ export default function App() {
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/pedidos" element={<Pedidos />} />
-          <Route
-            path="/produccion"
-            element={
-              <PlaceholderModule
-                title="Producción por Etapas & QR"
-                week="4"
-                desc="Kanban de producción: Corte ➔ Impresión ➔ Confección con desbloqueo secuencial."
-                icon="🏭"
-              />
-            }
-          />
+          <Route path="/produccion" element={<Produccion />} />
           <Route
             path="/trabajadores"
             element={

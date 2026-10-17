@@ -210,5 +210,84 @@ async def seed_semana_2():
             await session.commit()
             print("[OK] Pedidos de demostración sembrados con trazabilidad y códigos de rastreo único.")
 
+        # 4. Trabajadores y Órdenes de Producción
+        from app.models.trabajador import Trabajador, TipoPago
+        from app.models.produccion import (
+            OrdenCorte,
+            OrdenImpresion,
+            OrdenConfeccion,
+            EstadoEtapaProduccion,
+            TecnicaImpresion,
+            EtapaImpresion,
+        )
+
+        trabajadores_existentes = (await session.execute(select(Trabajador))).scalars().all()
+        if not trabajadores_existentes:
+            t1 = Trabajador(nombre="Carlos Cortador", documento="1001001", telefono="+57 311 000 1111", tipo_pago=TipoPago.PRODUCCION, activo=True)
+            t2 = Trabajador(nombre="Ana Técnica DTF", documento="1001002", telefono="+57 311 000 2222", tipo_pago=TipoPago.PRODUCCION, activo=True)
+            t3 = Trabajador(nombre="Pedro Confeccionista", documento="1001003", telefono="+57 311 000 3333", tipo_pago=TipoPago.PRODUCCION, activo=True)
+            session.add_all([t1, t2, t3])
+            await session.flush()
+
+            # Obtener líneas de pedido
+            lineas = (await session.execute(select(LineaPedido))).scalars().all()
+            if len(lineas) >= 2:
+                # Orden de Corte en proceso para línea 2
+                oc = OrdenCorte(
+                    pedido_id=lineas[1].pedido_id,
+                    linea_pedido_id=lineas[1].id,
+                    cortador_id=t1.id,
+                    cantidad_piezas=lineas[1].cantidad,
+                    costo_unitario=Decimal("1500.00"),
+                    total=Decimal(str(lineas[1].cantidad * 1500)),
+                    estado=EstadoEtapaProduccion.EN_PROCESO,
+                    observaciones="Corte de conjuntos deportivos dama",
+                )
+                session.add(oc)
+
+                # Orden de Corte TERMINADA para línea 1
+                oc1 = OrdenCorte(
+                    pedido_id=lineas[0].pedido_id,
+                    linea_pedido_id=lineas[0].id,
+                    cortador_id=t1.id,
+                    cantidad_piezas=lineas[0].cantidad,
+                    costo_unitario=Decimal("1500.00"),
+                    total=Decimal(str(lineas[0].cantidad * 1500)),
+                    estado=EstadoEtapaProduccion.TERMINADO,
+                    observaciones="Corte completo de camisas Oxford",
+                )
+                session.add(oc1)
+
+                # Orden de Impresión DTF en proceso para línea 1
+                oi = OrdenImpresion(
+                    pedido_id=lineas[0].pedido_id,
+                    linea_pedido_id=lineas[0].id,
+                    tecnico_id=t2.id,
+                    tecnica=TecnicaImpresion.DTF,
+                    cantidad=lineas[0].cantidad,
+                    costo_unitario=Decimal("3000.00"),
+                    total=Decimal(str(lineas[0].cantidad * 3000)),
+                    etapa=EtapaImpresion.ANTES_COSTURA,
+                    estado=EstadoEtapaProduccion.EN_PROCESO,
+                    observaciones="Estampado DTF pecho izquierdo",
+                )
+                session.add(oi)
+
+                # Orden de Confección en proceso para línea 1
+                conf = OrdenConfeccion(
+                    pedido_id=lineas[0].pedido_id,
+                    linea_pedido_id=lineas[0].id,
+                    operador_id=t3.id,
+                    cantidad_prendas=lineas[0].cantidad,
+                    costo_unitario=Decimal("5000.00"),
+                    total=Decimal(str(lineas[0].cantidad * 5000)),
+                    estado=EstadoEtapaProduccion.EN_PROCESO,
+                    observaciones="Ensamble de cuellos y mangas",
+                )
+                session.add(conf)
+
+            await session.commit()
+            print("[OK] Trabajadores y órdenes de producción de demostración sembrados.")
+
 if __name__ == "__main__":
     asyncio.run(seed_semana_2())

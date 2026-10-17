@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.database import engine, Base, AsyncSessionLocal
 from app.core.security import hash_password
 from app.models.usuario import Usuario, RolUsuario
-from app.models.trabajador import Trabajador
+from app.models.trabajador import Trabajador, Nomina, ProduccionDiaria
 from app.models.cliente import Cliente
 from app.models.producto import Producto, Variante
 from app.models.pedido import Pedido, LineaPedido, HistorialPedido

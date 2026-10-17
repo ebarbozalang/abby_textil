@@ -41,6 +41,16 @@ from app.schemas.produccion import (
     EscanearQrRequest,
     EscanearQrResponse,
 )
+from app.schemas.trabajador import (
+    TrabajadorBase,
+    TrabajadorCreate,
+    TrabajadorUpdate,
+    TrabajadorOut,
+    ProduccionDiariaCreate,
+    ProduccionDiariaOut,
+    LiquidarNominaRequest,
+    NominaOut,
+)
 
 __all__ = [
     "LoginRequest",
@@ -76,4 +86,12 @@ __all__ = [
     "TableroProduccionOut",
     "EscanearQrRequest",
     "EscanearQrResponse",
+    "TrabajadorBase",
+    "TrabajadorCreate",
+    "TrabajadorUpdate",
+    "TrabajadorOut",
+    "ProduccionDiariaCreate",
+    "ProduccionDiariaOut",
+    "LiquidarNominaRequest",
+    "NominaOut",
 ]

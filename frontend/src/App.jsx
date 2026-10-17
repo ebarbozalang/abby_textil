@@ -14,6 +14,7 @@ import Clientes from './pages/Clientes';
 import Catalogo from './pages/Catalogo';
 import Pedidos from './pages/Pedidos';
 import Produccion from './pages/Produccion';
+import Trabajadores from './pages/Trabajadores';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
 
@@ -91,17 +92,7 @@ export default function App() {
           <Route path="/catalogo" element={<Catalogo />} />
           <Route path="/pedidos" element={<Pedidos />} />
           <Route path="/produccion" element={<Produccion />} />
-          <Route
-            path="/trabajadores"
-            element={
-              <PlaceholderModule
-                title="Gestión de Trabajadores & Nómina"
-                week="5"
-                desc="Configuración de tipo de pago (fijo, por producción o mixto) y liquidación de nómina automática."
-                icon="👷"
-              />
-            }
-          />
+          <Route path="/trabajadores" element={<Trabajadores />} />
           <Route
             path="/tesoreria"
             element={

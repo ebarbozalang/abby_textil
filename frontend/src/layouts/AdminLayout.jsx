@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useTasaStore } from '../store/tasaStore';
 import {
   LayoutDashboard,
   Users,
@@ -14,6 +15,9 @@ import {
   Menu,
   X,
   ChevronRight,
+  RefreshCw,
+  Edit3,
+  Coins,
 } from 'lucide-react';
 
 export default function AdminLayout() {
@@ -21,6 +25,41 @@ export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
+  const { tasa, fuente, cargarTasa, sincronizarBCV, fijarTasaManual, cargando: tasaCargando } = useTasaStore();
+
+  const [modalTasaOpen, setModalTasaOpen] = useState(false);
+  const [nuevaTasaInput, setNuevaTasaInput] = useState('');
+  const [motivoTasaInput, setMotivoTasaInput] = useState('');
+  const [syncStatus, setSyncStatus] = useState('');
+
+  useEffect(() => {
+    cargarTasa();
+  }, []);
+
+  const handleSyncBCV = async () => {
+    setSyncStatus('Sincronizando con BCV...');
+    const res = await sincronizarBCV();
+    if (res.success) {
+      setSyncStatus(`¡Tasa BCV: Bs. ${parseFloat(res.tasa).toFixed(2)} / $!`);
+      setTimeout(() => setSyncStatus(''), 4000);
+    } else {
+      setSyncStatus('Error al conectar con BCV');
+      setTimeout(() => setSyncStatus(''), 4000);
+    }
+  };
+
+  const handleGuardarManual = async (e) => {
+    e.preventDefault();
+    if (!nuevaTasaInput || parseFloat(nuevaTasaInput) <= 0) return;
+    const res = await fijarTasaManual(nuevaTasaInput, motivoTasaInput || 'Ajuste manual administrativo');
+    if (res.success) {
+      setModalTasaOpen(false);
+      setNuevaTasaInput('');
+      setMotivoTasaInput('');
+      setSyncStatus(`¡Tasa manual: Bs. ${parseFloat(res.tasa).toFixed(2)} / $!`);
+      setTimeout(() => setSyncStatus(''), 4000);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -173,7 +212,136 @@ export default function AdminLayout() {
 
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 flex flex-col">
-        <Outlet />
+        {/* Top App Header with BCV Ticker */}
+        <header className="hidden md:flex bg-white border-b border-gray-200 px-6 py-2.5 items-center justify-between sticky top-0 z-30 shadow-xs">
+          <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+            <span className="font-bold text-gray-800">Moneda por Defecto:</span>
+            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold rounded-md border border-emerald-200">
+              USD ($)
+            </span>
+            <span className="text-gray-300">|</span>
+            <span>Moneda Secundaria:</span>
+            <span className="px-2 py-0.5 bg-purple-50 text-abby-700 font-bold rounded-md border border-purple-200">
+              Bolívares (Bs.)
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {syncStatus && (
+              <span className="text-xs font-semibold text-emerald-600 animate-pulse">
+                {syncStatus}
+              </span>
+            )}
+            {/* Tasa Pill */}
+            <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-purple-50 to-amber-50 border border-purple-200 rounded-xl">
+              <Coins className="w-4 h-4 text-amber-600" />
+              <div className="text-xs">
+                <span className="text-gray-500 text-[10px] font-semibold block uppercase">
+                  Tasa {fuente.includes('manual') ? 'Manual' : 'BCV Oficial'}
+                </span>
+                <span className="font-black text-gray-900 text-sm">
+                  Bs. {parseFloat(tasa || 45).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 4 })} / $
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1 border-l border-purple-200 pl-2 ml-1">
+                <button
+                  onClick={handleSyncBCV}
+                  disabled={tasaCargando}
+                  title="Sincronizar tasa oficial con BCV"
+                  className="p-1 text-purple-700 hover:text-purple-900 hover:bg-white rounded-md transition-colors"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${tasaCargando ? 'animate-spin' : ''}`} />
+                </button>
+                <button
+                  onClick={() => {
+                    setNuevaTasaInput(tasa.toFixed(2));
+                    setModalTasaOpen(true);
+                  }}
+                  title="Ajustar tasa manual del negocio"
+                  className="p-1 text-gray-600 hover:text-gray-900 hover:bg-white rounded-md transition-colors"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex-1">
+          <Outlet />
+        </div>
+
+        {/* Modal Tasa Manual */}
+        {modalTasaOpen && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-amber-600" />
+                  <h3 className="font-bold text-gray-900 text-lg">Ajustar Tasa de Cambio</h3>
+                </div>
+                <button
+                  onClick={() => setModalTasaOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleGuardarManual} className="space-y-4 mt-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+                    Nueva Tasa en Bolívares por Dólar (Bs/$) *
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    min="0.01"
+                    placeholder="Ej: 50.50"
+                    value={nuevaTasaInput}
+                    onChange={(e) => setNuevaTasaInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-base font-bold focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 uppercase mb-1">
+                    Motivo o Justificación
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: Tasa interna de cobro del día"
+                    value={motivoTasaInput}
+                    onChange={(e) => setMotivoTasaInput(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                  />
+                </div>
+
+                <div className="p-3 bg-amber-50 rounded-xl text-xs text-amber-800">
+                  💡 Esta tasa se aplicará para convertir los cobros en Bolívares a Dólares y mostrar los precios en Bs.
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setModalTasaOpen(false)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold shadow-sm"
+                  >
+                    Guardar Tasa Manual
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

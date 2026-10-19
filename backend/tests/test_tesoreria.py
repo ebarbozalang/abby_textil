@@ -83,7 +83,8 @@ async def test_flujo_pagos_anticipo_y_desbloqueo(client: AsyncClient, create_tes
         json={
             "pedido_id": pedido_id,
             "monto": "100000.00",
-            "metodo": "efectivo",
+            "moneda_pago": "USD",
+            "metodo": "efectivo_usd",
             "referencia": "REC-001",
         },
         headers=vendedor_headers,
@@ -104,8 +105,9 @@ async def test_flujo_pagos_anticipo_y_desbloqueo(client: AsyncClient, create_tes
         json={
             "pedido_id": pedido_id,
             "monto": "150000.00",
-            "metodo": "nequi",
-            "referencia": "NQ-884920",
+            "moneda_pago": "USD",
+            "metodo": "zelle",
+            "referencia": "ZL-884920",
         },
         headers=vendedor_headers,
     )
@@ -116,13 +118,15 @@ async def test_flujo_pagos_anticipo_y_desbloqueo(client: AsyncClient, create_tes
     assert float(ped_check_2.json()["anticipo"]) == 350000.00
     assert float(ped_check_2.json()["saldo_pendiente"]) == 650000.00
 
-    # 7. Liquidar el saldo restante ($650,000) por transferencia bancaria
+    # 7. Liquidar el saldo restante ($650,000) por transferencia en bolívares
     pago_3_res = await client.post(
         "/api/v1/tesoreria/pagos",
         json={
             "pedido_id": pedido_id,
             "monto": "650000.00",
-            "metodo": "transferencia",
+            "moneda_pago": "USD",
+            "metodo": "transferencia_bs",
+            "banco": "Banesco",
             "referencia": "TR-BANC-9921",
         },
         headers=vendedor_headers,
@@ -206,15 +210,18 @@ async def test_abonos_credito_y_cuentas_por_cobrar(client: AsyncClient, create_t
     # 1.120.000 / 2.000.000 = 56% -> riesgo 'normal'
     assert cliente_cpc["alerta_riesgo"] == "normal"
 
-    # 3. Registrar Abono a crédito vinculado al pedido
+    # 3. Registrar Abono a crédito vinculado al pedido en Pago Móvil
     abono_res = await client.post(
         "/api/v1/tesoreria/abonos",
         json={
             "cliente_id": cliente_id,
             "pedido_id": pedido_id,
             "monto": "500000.00",
-            "metodo": "daviplata",
-            "referencia": "DP-10023",
+            "moneda_pago": "USD",
+            "metodo": "pago_movil",
+            "banco": "Mercantil",
+            "telefono": "04121234567",
+            "referencia": "PM-10023",
             "notas": "Abono cuota 1",
         },
         headers=admin_headers,
@@ -231,7 +238,7 @@ async def test_abonos_credito_y_cuentas_por_cobrar(client: AsyncClient, create_t
 
 @pytest.mark.asyncio
 async def test_reporte_cierre_caja_diario(client: AsyncClient, create_test_users):
-    """Verifica que el endpoint de cierre de caja consolide ingresos por método de pago."""
+    """Verifica que el endpoint de cierre de caja consolide ingresos en USD y Bs."""
     admin_res = await client.post(
         "/api/v1/auth/login",
         json={"email": "admin@test.com", "password": "adminpass"},
@@ -243,10 +250,97 @@ async def test_reporte_cierre_caja_diario(client: AsyncClient, create_test_users
     assert cierre_res.status_code == 200
     data = cierre_res.json()
 
-    assert "total_recaudado" in data
-    assert "total_efectivo" in data
-    assert "total_transferencias" in data
-    assert "total_billeteras_digitales" in data
+    assert "total_recaudado_usd" in data
+    assert "total_recaudado_bs" in data
+    assert "total_efectivo_usd" in data
+    assert "total_pago_movil" in data
+    assert "total_transferencias_bs" in data
     assert "desglose_metodos" in data
     assert "movimientos" in data
     assert isinstance(data["desglose_metodos"], list)
+
+
+@pytest.mark.asyncio
+async def test_tasa_bcv_y_pago_dual_bs_usd(client: AsyncClient, create_test_users):
+    """
+    Verifica:
+    1. Consulta de tasa de cambio activa.
+    2. Modificación manual de tasa de cambio.
+    3. Pago realizado en Bolívares (BS) con conversión automática a USD y amortización correcta.
+    """
+    admin_res = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@test.com", "password": "adminpass"},
+    )
+    admin_token = admin_res.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    # 1. Establecer tasa manual a 50.00 Bs/$
+    tasa_set = await client.post(
+        "/api/v1/tasa/manual",
+        json={"tasa": 50.00, "motivo": "Tasa fija para testing"},
+        headers=admin_headers,
+    )
+    assert tasa_set.status_code == 200
+    assert float(tasa_set.json()["tasa"]) == 50.00
+
+    # 2. Consultar tasa activa
+    tasa_get = await client.get("/api/v1/tasa", headers=admin_headers)
+    assert tasa_get.status_code == 200
+    assert float(tasa_get.json()["tasa_actual"]["tasa"]) == 50.00
+
+    # 3. Crear cliente y pedido de $100 USD
+    cli_res = await client.post(
+        "/api/v1/clientes",
+        json={"nombre": "Cliente Tasa Test", "documento": "V-12345678", "credito_maximo": "1000.00"},
+        headers=admin_headers,
+    )
+    cliente_id = cli_res.json()["id"]
+
+    prod_res = await client.post(
+        "/api/v1/productos",
+        json={
+            "codigo": "POLO-VZLA",
+            "nombre": "Franela Polo",
+            "precio_base": "10.00",
+            "variantes_iniciales": [{"color": "Blanco", "talla": "M", "stock": 20}],
+        },
+        headers=admin_headers,
+    )
+    var_id = prod_res.json()["variantes"][0]["id"]
+
+    ped_res = await client.post(
+        "/api/v1/pedidos",
+        json={
+            "cliente_id": cliente_id,
+            "anticipo": "0.00",
+            "lineas": [{"variante_id": var_id, "cantidad": 10, "precio_unitario": "10.00"}], # $100 USD total
+        },
+        headers=admin_headers,
+    )
+    pedido_id = ped_res.json()["id"]
+    assert float(ped_res.json()["saldo_pendiente"]) == 100.00
+
+    # 4. Pagar 2500 Bs. por Pago Móvil (a tasa 50 Bs/$, equivale a $50 USD)
+    pago_res = await client.post(
+        "/api/v1/tesoreria/pagos",
+        json={
+            "pedido_id": pedido_id,
+            "monto": "2500.00",
+            "moneda_pago": "BS",
+            "metodo": "pago_movil",
+            "banco": "Banesco",
+            "telefono": "04140001122",
+            "referencia": "PM-554433",
+        },
+        headers=admin_headers,
+    )
+    assert pago_res.status_code == 201
+    pago_data = pago_res.json()
+    assert float(pago_data["monto_bs"]) == 2500.00
+    assert float(pago_data["monto_usd"]) == 50.00
+    assert float(pago_data["tasa_cambio"]) == 50.00
+
+    # El saldo del pedido debe haber disminuido en $50 USD -> restante $50 USD
+    ped_check = await client.get(f"/api/v1/pedidos/{pedido_id}", headers=admin_headers)
+    assert float(ped_check.json()["saldo_pendiente"]) == 50.00

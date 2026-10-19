@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { useTasaStore, formatUSD, formatBS } from '../store/tasaStore';
 import {
   Shirt,
   Search,
@@ -20,6 +21,7 @@ import {
 
 export default function Catalogo() {
   const { user } = useAuthStore();
+  const { tasa } = useTasaStore();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -35,7 +37,7 @@ export default function Catalogo() {
     nombre: '',
     tipo: 'casual',
     descripcion: '',
-    precio_base: '50000',
+    precio_base: '15.00',
     activo: true,
   });
 
@@ -102,7 +104,7 @@ export default function Catalogo() {
         nombre: '',
         tipo: 'casual',
         descripcion: '',
-        precio_base: '60000',
+        precio_base: '15.00',
         activo: true,
       });
     }
@@ -309,10 +311,13 @@ export default function Catalogo() {
                   <div className="mt-4 flex items-baseline justify-between">
                     <div>
                       <p className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold">
-                        Precio Base
+                        Precio Base ($ USD y Bs.)
                       </p>
-                      <p className="text-xl font-black text-gray-900">
-                        {formatCOP(prod.precio_base)}
+                      <p className="text-xl font-black text-gray-900 leading-tight">
+                        {formatUSD(prod.precio_base)}
+                      </p>
+                      <p className="text-xs font-bold text-purple-700">
+                        {formatBS(prod.precio_base, tasa)}
                       </p>
                     </div>
                     <div className="text-right">
@@ -445,18 +450,23 @@ export default function Catalogo() {
 
               <div>
                 <label className="block text-xs font-semibold uppercase text-gray-700 mb-1">
-                  Precio Base de Fabricación / Venta (COP) *
+                  Precio Base de Fabricación / Venta ($ USD) *
                 </label>
                 <input
                   type="number"
                   required
                   min="0"
-                  step="1000"
+                  step="0.01"
                   value={prodForm.precio_base}
                   onChange={(e) => setProdForm({ ...prodForm, precio_base: e.target.value })}
-                  placeholder="Ej: 85000"
+                  placeholder="Ej: 15.00"
                   className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-900"
                 />
+                {parseFloat(prodForm.precio_base) > 0 && (
+                  <p className="text-xs text-purple-700 font-medium mt-1">
+                    ≈ {formatBS(prodForm.precio_base, tasa)} (Tasa activa: Bs. {parseFloat(tasa || 45).toFixed(2)})
+                  </p>
+                )}
               </div>
 
               <div>

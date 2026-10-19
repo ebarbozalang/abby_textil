@@ -61,6 +61,11 @@ from app.schemas.tesoreria import (
     CierreCajaOut,
     CuentaPorCobrarOut,
 )
+from app.schemas.tasa_cambio import (
+    TasaCambioOut,
+    TasaManualRequest,
+    TasaHistorialOut,
+)
 
 __all__ = [
     "LoginRequest",
@@ -112,4 +117,7 @@ __all__ = [
     "MovimientoCajaItem",
     "CierreCajaOut",
     "CuentaPorCobrarOut",
+    "TasaCambioOut",
+    "TasaManualRequest",
+    "TasaHistorialOut",
 ]

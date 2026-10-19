@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
+import { useTasaStore, formatUSD, formatBS } from '../store/tasaStore';
 import {
   ShoppingBag,
   Search,
@@ -23,6 +24,7 @@ import {
 
 export default function Pedidos() {
   const { user } = useAuthStore();
+  const { tasa } = useTasaStore();
   const [pedidos, setPedidos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [productos, setProductos] = useState([]);
@@ -263,11 +265,7 @@ export default function Pedidos() {
   };
 
   const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
-    }).format(val || 0);
+    return formatUSD(val);
   };
 
   const getEstadoBadge = (estado) => {
@@ -406,13 +404,14 @@ export default function Pedidos() {
                       {getEstadoBadge(p.estado)}
                     </td>
 
-                    <td className="py-3.5 px-4 font-black text-gray-900">
-                      {formatCOP(p.total)}
+                    <td className="py-3.5 px-4 font-black text-gray-900 leading-tight">
+                      <div>{formatUSD(p.total)}</div>
+                      <div className="text-xs font-semibold text-purple-700">{formatBS(p.total, tasa)}</div>
                     </td>
 
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-emerald-700">{formatCOP(p.anticipo)}</span>
+                        <span className="font-semibold text-emerald-700">{formatUSD(p.anticipo)}</span>
                         <span
                           className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${
                             p.cumple_anticipo_minimo
@@ -423,12 +422,18 @@ export default function Pedidos() {
                           {p.porcentaje_anticipo.toFixed(0)}%
                         </span>
                       </div>
+                      <div className="text-[11px] text-gray-500 font-medium">
+                        {formatBS(p.anticipo, tasa)}
+                      </div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className={`font-bold ${parseFloat(p.saldo_pendiente) > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
-                        {formatCOP(p.saldo_pendiente)}
-                      </span>
+                      <div className={`font-bold ${parseFloat(p.saldo_pendiente) > 0 ? 'text-amber-600' : 'text-gray-400'}`}>
+                        {formatUSD(p.saldo_pendiente)}
+                      </div>
+                      <div className="text-xs font-semibold text-purple-700">
+                        {formatBS(p.saldo_pendiente, tasa)}
+                      </div>
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
@@ -624,14 +629,16 @@ export default function Pedidos() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div>
-                    <span className="text-gray-500">Subtotal:</span>
-                    <p className="font-bold text-gray-800 text-base">{formatCOP(subtotalCalculado)}</p>
+                    <span className="text-gray-500">Subtotal ($ USD):</span>
+                    <p className="font-bold text-gray-800 text-base">{formatUSD(subtotalCalculado)}</p>
+                    <span className="text-[11px] text-purple-700 font-semibold">{formatBS(subtotalCalculado, tasa)}</span>
                   </div>
 
                   <div>
-                    <label className="block text-gray-500 mb-0.5">Descuento (COP):</label>
+                    <label className="block text-gray-500 mb-0.5">Descuento ($ USD):</label>
                     <input
                       type="number"
+                      step="0.01"
                       min="0"
                       value={descuento}
                       onChange={(e) => setDescuento(e.target.value)}
@@ -640,21 +647,24 @@ export default function Pedidos() {
                   </div>
 
                   <div>
-                    <span className="text-gray-500">Total a Pagar:</span>
-                    <p className="font-black text-gray-900 text-base">{formatCOP(totalCalculado)}</p>
+                    <span className="text-gray-500">Total a Pagar ($ USD):</span>
+                    <p className="font-black text-gray-900 text-base">{formatUSD(totalCalculado)}</p>
+                    <span className="text-[11px] text-purple-700 font-bold">{formatBS(totalCalculado, tasa)}</span>
                   </div>
 
                   <div>
                     <label className="block text-gray-500 mb-0.5">
-                      Anticipo Pactado *
+                      Anticipo Pactado ($ USD) *
                     </label>
                     <input
                       type="number"
+                      step="0.01"
                       min="0"
                       value={anticipo}
                       onChange={(e) => setAnticipo(e.target.value)}
                       className="w-full px-2.5 py-1 bg-white border border-blue-300 rounded-lg text-xs font-black text-blue-800"
                     />
+                    <span className="text-[10px] text-gray-500">{formatBS(anticipo, tasa)}</span>
                   </div>
                 </div>
 

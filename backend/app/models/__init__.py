@@ -18,7 +18,8 @@ from app.models.produccion import (
     EtapaImpresion,
     EstadoEtapaProduccion,
 )
-from app.models.tesoreria import MetodoPago, Pago, AbonoCredito
+from app.models.tesoreria import MonedaPago, MetodoPago, Pago, AbonoCredito
+from app.models.tasa_cambio import TasaCambio
 
 __all__ = [
     "Base",
@@ -43,7 +44,9 @@ __all__ = [
     "TecnicaImpresion",
     "EtapaImpresion",
     "EstadoEtapaProduccion",
+    "MonedaPago",
     "MetodoPago",
     "Pago",
     "AbonoCredito",
+    "TasaCambio",
 ]

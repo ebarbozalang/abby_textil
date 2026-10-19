@@ -31,9 +31,11 @@ class Settings(BaseSettings):
                 return ["*"]
         return v
 
-    # Reglas de negocio globales
-    MONEDA_DEFAULT: str = "COP"
-    TIMEZONE: str = "America/Bogota"
+    # Reglas de negocio globales - Venezuela
+    MONEDA_DEFAULT: str = "USD"
+    MONEDA_SECUNDARIA: str = "BS"
+    TIMEZONE: str = "America/Caracas"
+    TASA_BCV_DEFAULT: float = 45.0
     ANTICIPO_MINIMO_PORCENTAJE: float = 30.0
 
     # Usuario Superusuario Inicial

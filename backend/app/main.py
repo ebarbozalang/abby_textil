@@ -23,6 +23,7 @@ from app.models import (
     OrdenConfeccion,
     Pago,
     AbonoCredito,
+    TasaCambio,
 )
 from app.api.v1.router import api_router
 

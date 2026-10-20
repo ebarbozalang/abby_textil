@@ -176,11 +176,11 @@ export default function Trabajadores() {
     }
   };
 
-  const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
+  const formatUSD = (val) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
+      currency: 'USD',
+      minimumFractionDigits: 2,
     }).format(val || 0);
   };
 
@@ -323,7 +323,7 @@ export default function Trabajadores() {
                         </td>
 
                         <td className="py-3.5 px-4 font-semibold text-gray-800">
-                          {parseFloat(t.salario_fijo) > 0 ? formatCOP(t.salario_fijo) : '$ 0 (100% Piezas)'}
+                          {parseFloat(t.salario_fijo) > 0 ? formatUSD(t.salario_fijo) : '$ 0.00 (100% Piezas)'}
                         </td>
 
                         <td className="py-3.5 px-4 text-xs text-gray-500">
@@ -450,15 +450,15 @@ export default function Trabajadores() {
                         </td>
 
                         <td className="py-3.5 px-4 font-semibold text-gray-700">
-                          {formatCOP(n.monto_produccion)}
+                          {formatUSD(n.monto_produccion)}
                         </td>
 
                         <td className="py-3.5 px-4 text-xs text-gray-500">
-                          {formatCOP(n.monto_fijo)}
+                          {formatUSD(n.monto_fijo)}
                         </td>
 
                         <td className="py-3.5 px-4 font-black text-gray-900 text-base">
-                          {formatCOP(n.total)}
+                          {formatUSD(n.total)}
                         </td>
 
                         <td className="py-3.5 px-4">
@@ -548,7 +548,7 @@ export default function Trabajadores() {
                     type="text"
                     value={formData.telefono}
                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    placeholder="+57 310 123 4567"
+                    placeholder="+58 414 123 4567"
                     className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -571,15 +571,15 @@ export default function Trabajadores() {
 
               <div>
                 <label className="block font-semibold uppercase text-gray-700 mb-1">
-                  Salario Fijo Base (COP) {formData.tipo_pago === 'produccion' ? '(Opcional)' : '*'}
+                  Salario Fijo Base (USD) {formData.tipo_pago === 'produccion' ? '(Opcional)' : '*'}
                 </label>
                 <input
                   type="number"
                   min="0"
-                  step="50000"
+                  step="1"
                   value={formData.salario_fijo}
                   onChange={(e) => setFormData({ ...formData, salario_fijo: e.target.value })}
-                  placeholder="0"
+                  placeholder="0.00"
                   className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

@@ -264,10 +264,6 @@ export default function Pedidos() {
     }
   };
 
-  const formatCOP = (val) => {
-    return formatUSD(val);
-  };
-
   const getEstadoBadge = (estado) => {
     switch (estado) {
       case 'borrador':
@@ -493,7 +489,7 @@ export default function Pedidos() {
                   <option value="">-- Seleccione un cliente registrado --</option>
                   {clientes.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.nombre} (Doc: {c.documento}) — Cupo: {formatCOP(c.credito_maximo)}
+                      {c.nombre} (Doc: {c.documento}) — Cupo: {formatUSD(c.credito_maximo)}
                     </option>
                   ))}
                 </select>
@@ -502,15 +498,15 @@ export default function Pedidos() {
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs pt-3 border-t border-gray-200">
                     <div className="bg-white p-2.5 rounded-lg border border-gray-200">
                       <span className="text-gray-400">Cupo Máximo:</span>
-                      <p className="font-bold text-gray-800 text-sm">{formatCOP(selectedCliente.credito_maximo)}</p>
+                      <p className="font-bold text-gray-800 text-sm">{formatUSD(selectedCliente.credito_maximo)}</p>
                     </div>
                     <div className="bg-white p-2.5 rounded-lg border border-gray-200">
                       <span className="text-gray-400">Saldo Pendiente Actual:</span>
-                      <p className="font-bold text-amber-600 text-sm">{formatCOP(selectedCliente.saldo_pendiente_global)}</p>
+                      <p className="font-bold text-amber-600 text-sm">{formatUSD(selectedCliente.saldo_pendiente_global)}</p>
                     </div>
                     <div className="bg-white p-2.5 rounded-lg border border-gray-200">
                       <span className="text-gray-400">Cupo Disponible:</span>
-                      <p className="font-bold text-emerald-600 text-sm">{formatCOP(selectedCliente.credito_disponible)}</p>
+                      <p className="font-bold text-emerald-600 text-sm">{formatUSD(selectedCliente.credito_disponible)}</p>
                     </div>
                   </div>
                 )}
@@ -680,12 +676,12 @@ export default function Pedidos() {
                       ) : (
                         <>
                           <AlertTriangle size={14} />
-                          <span>Anticipo Bajo: Quedará en BORRADOR (Requiere mín 30% = {formatCOP(anticipoMinimo30)})</span>
+                          <span>Anticipo Bajo: Quedará en BORRADOR (Requiere mín 30% = {formatUSD(anticipoMinimo30)})</span>
                         </>
                       )}
                     </span>
                     <span className="text-gray-500">
-                      Saldo a Crédito: {formatCOP(saldoPendienteCalculado)}
+                      Saldo a Crédito: {formatUSD(saldoPendienteCalculado)}
                     </span>
                   </div>
 
@@ -704,7 +700,7 @@ export default function Pedidos() {
                   <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-800 text-xs flex items-center gap-2">
                     <ShieldAlert size={18} className="shrink-0 text-red-600" />
                     <span>
-                      <strong>BLOQUEO POR CUPO DE CRÉDITO:</strong> El saldo resultante ({formatCOP(nuevoSaldoGlobalCliente)}) supera el cupo asignado al cliente ({formatCOP(selectedCliente.credito_maximo)}). Aumente el anticipo para permitir la creación.
+                      <strong>BLOQUEO POR CUPO DE CRÉDITO:</strong> El saldo resultante ({formatUSD(nuevoSaldoGlobalCliente)}) supera el cupo asignado al cliente ({formatUSD(selectedCliente.credito_maximo)}). Aumente el anticipo para permitir la creación.
                     </span>
                   </div>
                 )}
@@ -878,7 +874,7 @@ export default function Pedidos() {
                     <div key={h.id} className="p-2.5 bg-gray-50 rounded-lg text-xs space-y-0.5 border border-gray-100">
                       <div className="flex justify-between font-semibold text-gray-700">
                         <span>{h.estado_anterior || 'Inicio'} ➔ {h.estado_nuevo}</span>
-                        <span className="text-[10px] text-gray-400">{new Date(h.fecha).toLocaleString('es-CO')}</span>
+                        <span className="text-[10px] text-gray-400">{new Date(h.fecha).toLocaleString('es-VE')}</span>
                       </div>
                       {h.observacion && <p className="text-gray-500 text-[11px]">{h.observacion}</p>}
                     </div>

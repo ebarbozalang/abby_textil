@@ -190,11 +190,11 @@ export default function Catalogo() {
     return `${cod}-${col}-${tal}`;
   };
 
-  const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
+  const formatUSDLocal = (val) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
+      currency: 'USD',
+      minimumFractionDigits: 2,
     }).format(val || 0);
   };
 

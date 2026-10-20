@@ -49,7 +49,7 @@ export default function Dashboard() {
   const alertas = data?.alertas || [];
   const alertasAltas = alertas.filter((a) => a.severidad === 'alta');
 
-  const today = new Date().toLocaleDateString('es-CO', {
+  const today = new Date().toLocaleDateString('es-VE', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -73,7 +73,7 @@ export default function Dashboard() {
         >
           <RefreshCcw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           {lastUpdate
-            ? `Actualizado a las ${lastUpdate.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`
+            ? `Actualizado a las ${lastUpdate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}`
             : 'Actualizar'}
         </button>
       </div>
@@ -148,7 +148,7 @@ export default function Dashboard() {
                   Recaudo Hoy
                 </span>
                 <p className="text-3xl font-black mt-2">
-                  ${parseFloat(kpis?.recaudo_hoy ?? 0).toLocaleString('es-CO')}
+                  ${parseFloat(kpis?.recaudo_hoy ?? 0).toFixed(2)}
                 </p>
                 <p className="text-xs text-emerald-200 mt-1">Pagos y abonos del día</p>
               </div>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                   Recaudo del Mes
                 </span>
                 <p className="text-3xl font-black mt-2">
-                  ${parseFloat(kpis?.recaudo_mes ?? 0).toLocaleString('es-CO')}
+                  ${parseFloat(kpis?.recaudo_mes ?? 0).toFixed(2)}
                 </p>
                 <p className="text-xs text-blue-200 mt-1">Acumulado del mes en curso</p>
               </div>
@@ -169,7 +169,7 @@ export default function Dashboard() {
                   <TrendingUp className="w-5 h-5 text-red-500" />
                 </div>
                 <p className="text-3xl font-black text-red-600 mt-1">
-                  ${parseFloat(kpis?.cartera_total ?? 0).toLocaleString('es-CO')}
+                  ${parseFloat(kpis?.cartera_total ?? 0).toFixed(2)}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">Saldos pendientes (todos los pedidos)</p>
               </div>

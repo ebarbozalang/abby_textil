@@ -92,7 +92,7 @@ export default function Produccion() {
       });
 
       setSuccessMsg(
-        `¡${res.data.etapa_completada} Registrada! ${res.data.mensaje} (+$${Number(res.data.monto_generado).toLocaleString('es-CO')})`
+        `¡${res.data.etapa_completada} Registrada! ${res.data.mensaje} (+$${Number(res.data.monto_generado).toFixed(2)})`
       );
       setCodigoEscaneado('');
       fetchTablero();
@@ -201,11 +201,11 @@ export default function Produccion() {
     }
   };
 
-  const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
+  const formatUSD = (val) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
+      currency: 'USD',
+      minimumFractionDigits: 2,
     }).format(val || 0);
   };
 
@@ -359,7 +359,7 @@ export default function Produccion() {
                   <span className="text-gray-500 flex items-center gap-1">
                     <User size={12} /> {c.cortador?.nombre || 'Cortador'}
                   </span>
-                  <span className="font-bold text-gray-800">{formatCOP(c.total)}</span>
+                  <span className="font-bold text-gray-800">{formatUSD(c.total)}</span>
                 </div>
 
                 {c.estado !== 'terminado' && (
@@ -433,7 +433,7 @@ export default function Produccion() {
                   <span className="text-gray-500 flex items-center gap-1">
                     <User size={12} /> {imp.tecnico?.nombre || 'Técnico'}
                   </span>
-                  <span className="font-bold text-gray-800">{formatCOP(imp.total)}</span>
+                  <span className="font-bold text-gray-800">{formatUSD(imp.total)}</span>
                 </div>
 
                 {imp.estado !== 'terminado' && (
@@ -507,7 +507,7 @@ export default function Produccion() {
                   <span className="text-gray-500 flex items-center gap-1">
                     <User size={12} /> {conf.operador?.nombre || 'Operador'}
                   </span>
-                  <span className="font-bold text-gray-800">{formatCOP(conf.total)}</span>
+                  <span className="font-bold text-gray-800">{formatUSD(conf.total)}</span>
                 </div>
 
                 {conf.estado !== 'terminado' && (
@@ -683,7 +683,7 @@ export default function Produccion() {
                 </div>
 
                 <div>
-                  <label className="block font-semibold uppercase text-gray-700 mb-1">Costo Unitario (COP) *</label>
+                  <label className="block font-semibold uppercase text-gray-700 mb-1">Costo Unitario (USD) *</label>
                   <input
                     type="number"
                     min="0"

@@ -96,7 +96,7 @@ export default function PortalTrabajador() {
             </span>
             {stats?.tipo_pago === 'fijo' || stats?.tipo_pago === 'mixto' ? (
               <span className="ml-2 text-gray-400">
-                (Salario fijo: ${parseFloat(stats?.salario_fijo || 0).toLocaleString('es-CO')}/período)
+                (Salario fijo: ${parseFloat(stats?.salario_fijo || 0).toFixed(2)}/período)
               </span>
             ) : null}
           </p>
@@ -108,7 +108,7 @@ export default function PortalTrabajador() {
             <p className="text-2xl font-black text-amber-600">
               {loading
                 ? '...'
-                : `$${parseFloat(stats?.mes_ganancia || 0).toLocaleString('es-CO')}`}
+                : `$${parseFloat(stats?.mes_ganancia || 0).toFixed(2)}`}
             </p>
           </div>
           <button
@@ -186,7 +186,7 @@ export default function PortalTrabajador() {
             <p className="text-3xl font-black text-gray-900">{stats?.hoy_piezas ?? 0}</p>
             <p className="text-xs text-gray-500 mt-0.5">prendas registradas</p>
             <p className="text-lg font-bold text-blue-600 mt-3">
-              ${parseFloat(stats?.hoy_ganancia ?? 0).toLocaleString('es-CO')}
+              ${parseFloat(stats?.hoy_ganancia ?? 0).toFixed(2)}
             </p>
             <p className="text-xs text-gray-400">ganancia del día</p>
           </div>
@@ -204,7 +204,7 @@ export default function PortalTrabajador() {
             <p className="text-3xl font-black text-gray-900">{stats?.semana_piezas ?? 0}</p>
             <p className="text-xs text-gray-500 mt-0.5">prendas registradas</p>
             <p className="text-lg font-bold text-amber-600 mt-3">
-              ${parseFloat(stats?.semana_ganancia ?? 0).toLocaleString('es-CO')}
+              ${parseFloat(stats?.semana_ganancia ?? 0).toFixed(2)}
             </p>
             <p className="text-xs text-gray-400">ganancia de la semana</p>
           </div>
@@ -222,7 +222,7 @@ export default function PortalTrabajador() {
             <p className="text-3xl font-black">{stats?.mes_piezas ?? 0}</p>
             <p className="text-xs text-amber-100 mt-0.5">prendas registradas</p>
             <p className="text-xl font-black mt-3">
-              ${parseFloat(stats?.mes_ganancia ?? 0).toLocaleString('es-CO')}
+              ${parseFloat(stats?.mes_ganancia ?? 0).toFixed(2)}
             </p>
             <p className="text-xs text-amber-200">ganancia estimada del mes</p>
           </div>
@@ -268,7 +268,7 @@ export default function PortalTrabajador() {
                 </div>
                 <div className="text-right">
                   <p className="font-black text-gray-900 text-lg">
-                    ${parseFloat(nom.total).toLocaleString('es-CO')}
+                    ${parseFloat(nom.total).toFixed(2)}
                   </p>
                   <p className="text-xs text-gray-400">Nómina #{nom.id}</p>
                 </div>

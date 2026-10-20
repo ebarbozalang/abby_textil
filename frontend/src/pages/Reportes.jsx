@@ -24,7 +24,7 @@ const TABS = [
   { id: 'morosidad',    label: 'Morosidad',     icon: <AlertTriangle className="w-4 h-4" /> },
 ];
 
-function fmt(n) { return parseFloat(n || 0).toLocaleString('es-CO'); }
+function fmt(n) { return `$${parseFloat(n || 0).toFixed(2)}`; }
 
 export default function Reportes() {
   const [activeTab, setActiveTab] = useState('ventas');

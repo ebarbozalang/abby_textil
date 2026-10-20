@@ -124,11 +124,11 @@ export default function Clientes() {
     }
   };
 
-  const formatCOP = (val) => {
-    return new Intl.NumberFormat('es-CO', {
+  const formatUSD = (val) => {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0,
+      currency: 'USD',
+      minimumFractionDigits: 2,
     }).format(val || 0);
   };
 
@@ -240,12 +240,12 @@ export default function Clientes() {
                       </td>
 
                       <td className="py-3.5 px-4 font-semibold text-gray-800">
-                        {formatCOP(maxCred)}
+                        {formatUSD(maxCred)}
                       </td>
 
                       <td className="py-3.5 px-4">
                         <span className={`font-bold ${saldo > 0 ? 'text-amber-600' : 'text-gray-500'}`}>
-                          {formatCOP(saldo)}
+                          {formatUSD(saldo)}
                         </span>
                       </td>
 
@@ -256,7 +256,7 @@ export default function Clientes() {
                               {excede ? 'Cupo Superado' : `${porcentajeUso.toFixed(0)}% usado`}
                             </span>
                             <span className="text-gray-500 text-[11px]">
-                              Disp: {formatCOP(c.credito_disponible)}
+                              Disp: {formatUSD(c.credito_disponible)}
                             </span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -357,7 +357,7 @@ export default function Clientes() {
                     type="text"
                     value={formData.telefono}
                     onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
-                    placeholder="+57 300 123 4567"
+                    placeholder="+58 414 123 4567"
                     className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -379,15 +379,15 @@ export default function Clientes() {
 
                 <div>
                   <label className="block text-xs font-semibold uppercase text-gray-700 mb-1">
-                    Cupo de Crédito Máximo (COP)
+                    Cupo de Crédito Máximo (USD)
                   </label>
                   <input
                     type="number"
                     min="0"
-                    step="50000"
+                    step="10"
                     value={formData.credito_maximo}
                     onChange={(e) => setFormData({ ...formData, credito_maximo: e.target.value })}
-                    placeholder="Ej: 2000000"
+                    placeholder="Ej: 500.00"
                     className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-blue-700"
                   />
                 </div>

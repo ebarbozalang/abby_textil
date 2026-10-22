@@ -21,8 +21,8 @@ async def test_flujo_produccion_secuencial_completo(client: AsyncClient, create_
     from app.models.trabajador import Trabajador, TipoPago
     trabajador = Trabajador(
         nombre="Pedro Cortador y Confeccionista",
-        documento="1098765400",
-        telefono="+57 315 111 2233",
+        documento="V-10987654",
+        telefono="+58 414 111 2233",
         tipo_pago=TipoPago.PRODUCCION,
         salario_fijo=0,
         activo=True,
@@ -34,7 +34,7 @@ async def test_flujo_produccion_secuencial_completo(client: AsyncClient, create_
     # 3. Crear cliente
     cli_res = await client.post(
         "/api/v1/clientes",
-        json={"nombre": "Modas Bogotá", "documento": "900555666-1", "credito_maximo": "5000000.00"},
+        json={"nombre": "Modas Caracas C.A.", "documento": "J-30955566-1", "credito_maximo": "5000000.00"},
         headers=headers,
     )
     cliente_id = cli_res.json()["id"]

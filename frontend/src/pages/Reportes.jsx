@@ -216,7 +216,7 @@ export default function Reportes() {
 
               {/* Por Cliente */}
               <Acordeon title={`Por Cliente (${data.por_cliente.length})`} icon={<Users className="w-4 h-4" />}>
-                <TableWrapper headers={['Cliente', 'Documento', 'Pedidos', 'Facturado', 'Cobrado', 'Saldo']}>
+                <TableWrapper headers={['Cliente', 'RIF / C.I.', 'Pedidos', 'Facturado', 'Cobrado', 'Saldo']}>
                   {data.por_cliente.map((c) => (
                     <tr key={c.cliente_id} className="hover:bg-gray-50/60 text-sm">
                       <td className="px-4 py-3 font-semibold text-gray-900">{c.cliente_nombre}</td>

@@ -116,7 +116,7 @@ async def test_reporte_rentabilidad_con_pedido(client: AsyncClient, create_test_
     # Crear cliente + producto
     cli = await client.post(
         "/api/v1/clientes",
-        json={"nombre": "Rentabilidad SAS", "documento": "901111222-2", "credito_maximo": "4000000.00", "activo": True},
+        json={"nombre": "Rentabilidad C.A.", "documento": "J-30111222-2", "credito_maximo": "4000000.00", "activo": True},
         headers=admin_headers,
     )
     cliente_id = cli.json()["id"]
@@ -176,7 +176,7 @@ async def test_reporte_morosidad(client: AsyncClient, create_test_users):
     # Crear cliente con cupo limitado
     cli = await client.post(
         "/api/v1/clientes",
-        json={"nombre": "Moroso Test SAS", "documento": "800999111-3", "credito_maximo": "500000.00", "activo": True},
+        json={"nombre": "Moroso Test C.A.", "documento": "J-30099911-3", "credito_maximo": "500000.00", "activo": True},
         headers=admin_headers,
     )
     cliente_id = cli.json()["id"]

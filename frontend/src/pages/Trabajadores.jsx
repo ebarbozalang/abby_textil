@@ -273,7 +273,7 @@ export default function Trabajadores() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar trabajador por nombre o cédula..."
+              placeholder="Buscar trabajador por nombre o Cédula (V-)..."
               className="w-full bg-transparent border-none text-sm focus:outline-none text-gray-800"
             />
             {search && (
@@ -299,7 +299,7 @@ export default function Trabajadores() {
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       <th className="py-3.5 px-4">Trabajador</th>
-                      <th className="py-3.5 px-4">Cédula / Doc</th>
+                      <th className="py-3.5 px-4">Cédula (C.I.)</th>
                       <th className="py-3.5 px-4">Modalidad de Pago</th>
                       <th className="py-3.5 px-4">Salario Base</th>
                       <th className="py-3.5 px-4">Ingreso</th>
@@ -528,14 +528,14 @@ export default function Trabajadores() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold uppercase text-gray-700 mb-1">
-                    Cédula / Documento *
+                    Cédula de Identidad (C.I.) *
                   </label>
                   <input
                     type="text"
                     required
                     value={formData.documento}
                     onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
-                    placeholder="1098765432"
+                    placeholder="V-18765432"
                     className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

@@ -17,9 +17,9 @@ async def test_crear_pedido_con_anticipo_valido(client: AsyncClient, create_test
     cli_res = await client.post(
         "/api/v1/clientes",
         json={
-            "nombre": "Textiles del Norte SAS",
-            "documento": "800111222-3",
-            "telefono": "+57 312 333 4444",
+            "nombre": "Textiles del Norte C.A.",
+            "documento": "J-30111222-3",
+            "telefono": "+58 412 333 4444",
             "credito_maximo": "10000000.00",
             "activo": True,
         },

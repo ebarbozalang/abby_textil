@@ -16,8 +16,8 @@ async def test_trabajador_crud(client: AsyncClient, create_test_users):
     # 1. Crear trabajador modalidad produccion
     t_payload = {
         "nombre": "Jorge Cortador Experto",
-        "documento": "10102020",
-        "telefono": "+57 312 000 9999",
+        "documento": "V-15890123",
+        "telefono": "+58 412 000 9999",
         "tipo_pago": "produccion",
         "salario_fijo": "0.00",
         "activo": True,
@@ -65,7 +65,7 @@ async def test_liquidacion_nomina_produccion_y_mixto(client: AsyncClient, create
             "/api/v1/trabajadores",
             json={
                 "nombre": "Marta Confección",
-                "documento": "888999111",
+                "documento": "V-18889991",
                 "tipo_pago": "produccion",
                 "salario_fijo": "0.00",
             },
@@ -79,7 +79,7 @@ async def test_liquidacion_nomina_produccion_y_mixto(client: AsyncClient, create
             "/api/v1/trabajadores",
             json={
                 "nombre": "Ricardo Cortador Mixto",
-                "documento": "888999222",
+                "documento": "V-18889992",
                 "tipo_pago": "mixto",
                 "salario_fijo": "800000.00",
             },
@@ -91,7 +91,7 @@ async def test_liquidacion_nomina_produccion_y_mixto(client: AsyncClient, create
     cli = (
         await client.post(
             "/api/v1/clientes",
-            json={"nombre": "Cliente Nómina", "documento": "11223344", "credito_maximo": "5000000.00"},
+            json={"nombre": "Cliente Nómina", "documento": "J-30112233-4", "credito_maximo": "5000000.00"},
             headers=headers,
         )
     ).json()

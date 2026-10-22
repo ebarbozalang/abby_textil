@@ -489,7 +489,7 @@ export default function Pedidos() {
                   <option value="">-- Seleccione un cliente registrado --</option>
                   {clientes.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.nombre} (Doc: {c.documento}) — Cupo: {formatUSD(c.credito_maximo)}
+                      {c.nombre} (RIF/CI: {c.documento}) — Cupo: {formatUSD(c.credito_maximo)}
                     </option>
                   ))}
                 </select>

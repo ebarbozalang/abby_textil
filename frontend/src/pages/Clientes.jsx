@@ -176,7 +176,7 @@ export default function Clientes() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nombre, documento (NIT/CC), teléfono o email..."
+          placeholder="Buscar por nombre, RIF o Cédula (J-/V-), teléfono o email..."
           className="w-full bg-transparent border-none text-sm focus:outline-none text-gray-800"
         />
         {search && (
@@ -203,7 +203,7 @@ export default function Clientes() {
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   <th className="py-3.5 px-4">Cliente / Contacto</th>
-                  <th className="py-3.5 px-4">Documento</th>
+                  <th className="py-3.5 px-4">RIF / C.I.</th>
                   <th className="py-3.5 px-4">Cupo de Crédito</th>
                   <th className="py-3.5 px-4">Saldo Pendiente</th>
                   <th className="py-3.5 px-4">Disponibilidad</th>
@@ -329,7 +329,7 @@ export default function Clientes() {
                   required
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  placeholder="Ej: Distribuidora Textil Andina"
+                  placeholder="Ej: Confecciones AbbyTextil C.A."
                   className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -337,14 +337,14 @@ export default function Clientes() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold uppercase text-gray-700 mb-1">
-                    Documento (NIT / CC) *
+                    Documento (RIF / C.I.) *
                   </label>
                   <input
                     type="text"
                     required
                     value={formData.documento}
                     onChange={(e) => setFormData({ ...formData, documento: e.target.value })}
-                    placeholder="900123456-1"
+                    placeholder="J-12345678-0 o V-12345678"
                     className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                   />
                 </div>
@@ -401,7 +401,7 @@ export default function Clientes() {
                   type="text"
                   value={formData.direccion}
                   onChange={(e) => setFormData({ ...formData, direccion: e.target.value })}
-                  placeholder="Calle 10 # 20-30, Ciudad"
+                  placeholder="Av. Bolívar, Centro Comercial o Local, Ciudad"
                   className="w-full px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

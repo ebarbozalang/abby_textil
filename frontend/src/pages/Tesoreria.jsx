@@ -33,10 +33,15 @@ const BANCOS_VENEZUELA = [
   'Mercantil',
   'BBVA Provincial',
   'BNC (Banco Nacional de Crédito)',
+  'Bancamiga',
   'Bancaribe',
   'Banplus',
   'Banco Exterior',
+  'Banco Bicentenario',
   'Banco del Tesoro',
+  'Banco Fondo Común (BFC)',
+  '100% Banco',
+  'Venezolano de Crédito',
   'Otro Banco'
 ];
 

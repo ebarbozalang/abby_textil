@@ -15,22 +15,22 @@ async def test_cliente_crud(client: AsyncClient, create_test_users):
 
     # 2. Crear cliente
     cliente_payload = {
-        "nombre": "Boutique Elegancia SAS",
-        "documento": "900123456-1",
-        "telefono": "+57 300 123 4567",
-        "direccion": "Calle 45 # 12-34, Bogotá",
+        "nombre": "Boutique Elegancia C.A.",
+        "documento": "J-40123456-7",
+        "telefono": "+58 414 123 4567",
+        "direccion": "Av. Francisco de Miranda, Chacao, Caracas",
         "email": "contacto@elegancia.com",
-        "credito_maximo": "5000000.00",
+        "credito_maximo": "5000.00",
         "activo": True,
     }
     create_res = await client.post("/api/v1/clientes", json=cliente_payload, headers=headers)
     assert create_res.status_code == 201
     cliente = create_res.json()
-    assert cliente["nombre"] == "Boutique Elegancia SAS"
-    assert cliente["documento"] == "900123456-1"
-    assert float(cliente["credito_maximo"]) == 5000000.0
+    assert cliente["nombre"] == "Boutique Elegancia C.A."
+    assert cliente["documento"] == "J-40123456-7"
+    assert float(cliente["credito_maximo"]) == 5000.0
     assert float(cliente["saldo_pendiente_global"]) == 0.0
-    assert cliente["credito_disponible"] == 5000000.0
+    assert cliente["credito_disponible"] == 5000.0
     assert cliente["excede_credito"] is False
     cliente_id = cliente["id"]
 
@@ -50,11 +50,11 @@ async def test_cliente_crud(client: AsyncClient, create_test_users):
     assert get_res.json()["id"] == cliente_id
 
     # 6. Actualizar crédito y teléfono
-    update_payload = {"credito_maximo": "7000000.00", "telefono": "+57 311 999 8888"}
+    update_payload = {"credito_maximo": "7000.00", "telefono": "+58 424 999 8888"}
     put_res = await client.put(f"/api/v1/clientes/{cliente_id}", json=update_payload, headers=headers)
     assert put_res.status_code == 200
-    assert float(put_res.json()["credito_maximo"]) == 7000000.0
-    assert put_res.json()["telefono"] == "+57 311 999 8888"
+    assert float(put_res.json()["credito_maximo"]) == 7000.0
+    assert put_res.json()["telefono"] == "+58 424 999 8888"
 
     # 7. Desactivar cliente (requiere admin o superuser)
     # Login como admin

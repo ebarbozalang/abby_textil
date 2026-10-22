@@ -30,9 +30,9 @@ async def test_flujo_pagos_anticipo_y_desbloqueo(client: AsyncClient, create_tes
     cli_res = await client.post(
         "/api/v1/clientes",
         json={
-            "nombre": "Confecciones La 10",
-            "documento": "900555666-1",
-            "telefono": "+57 300 777 8899",
+            "nombre": "Confecciones AbbyTextil C.A.",
+            "documento": "J-30955566-1",
+            "telefono": "+58 412 777 8899",
             "credito_maximo": "5000000.00",
             "activo": True,
         },
@@ -154,9 +154,9 @@ async def test_abonos_credito_y_cuentas_por_cobrar(client: AsyncClient, create_t
     cli_res = await client.post(
         "/api/v1/clientes",
         json={
-            "nombre": "Modas Europa Ltda",
-            "documento": "830001999-4",
-            "telefono": "+57 315 111 2233",
+            "nombre": "Modas Europa C.A.",
+            "documento": "J-30001999-4",
+            "telefono": "+58 414 111 2233",
             "credito_maximo": "2000000.00",
             "activo": True,
         },

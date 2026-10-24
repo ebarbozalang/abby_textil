@@ -96,17 +96,7 @@ export default function App() {
           <Route path="/produccion" element={<Produccion />} />
           <Route path="/trabajadores" element={<Trabajadores />} />
           <Route path="/tesoreria" element={<Tesoreria />} />
-          <Route
-            path="/reportes"
-            element={
-              <PlaceholderModule
-                title="Reportes & Rentabilidad"
-                week="9"
-                desc="KPIs de producción, rendimiento por operario, rentabilidad por pedido y morosidad."
-                icon="📊"
-              />
-            }
-          />
+          <Route path="/reportes" element={<Reportes />} />
         </Route>
 
         {/* 404 */}

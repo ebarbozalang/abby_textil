@@ -20,6 +20,7 @@ from app.models.produccion import (
 )
 from app.models.tesoreria import MonedaPago, MetodoPago, Pago, AbonoCredito
 from app.models.tasa_cambio import TasaCambio
+from app.models.despacho import Despacho, Transportista, EstadoDespacho
 
 __all__ = [
     "Base",
@@ -49,4 +50,7 @@ __all__ = [
     "Pago",
     "AbonoCredito",
     "TasaCambio",
+    "Despacho",
+    "Transportista",
+    "EstadoDespacho",
 ]

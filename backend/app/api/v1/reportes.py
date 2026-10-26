@@ -1,6 +1,6 @@
 import csv
 import io
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional
 
@@ -21,8 +21,8 @@ from app.models.produccion import (
     OrdenCorte, OrdenImpresion, OrdenConfeccion,
     TecnicaImpresion, EstadoEtapaProduccion,
 )
-from app.models.trabajador import Trabajador
-from app.models.tesoreria import Pago, AbonoCredito
+from app.models.trabajador import Trabajador, Nomina, EstadoNomina
+from app.models.tesoreria import Pago, AbonoCredito, MetodoPago
 
 router = APIRouter(prefix="/reportes", tags=["Reportes & Rentabilidad"])
 
@@ -130,6 +130,58 @@ class ReporteMorosidadOut(BaseModel):
     total_clientes_morosos: int
     total_deuda_vencida: Decimal
     clientes: List[ItemMorosidad]
+
+class ItemReporteCajaMetodo(BaseModel):
+    metodo: str
+    total_usd: Decimal
+    total_bs: Decimal
+    cantidad_transacciones: int
+
+class ItemReporteCajaDetalle(BaseModel):
+    id: int
+    tipo: str  # "pago_pedido" | "abono_credito"
+    fecha: date
+    cliente_nombre: str
+    pedido_id: Optional[int]
+    monto_usd: Decimal
+    monto_bs: Decimal
+    tasa_cambio: Decimal
+    moneda_pago: str
+    metodo: str
+    banco: Optional[str]
+    referencia: Optional[str]
+
+class ReporteCajaOut(BaseModel):
+    fecha_inicio: date
+    fecha_fin: date
+    total_recaudado_usd: Decimal
+    total_recaudado_bs: Decimal
+    por_metodo: List[ItemReporteCajaMetodo]
+    transacciones: List[ItemReporteCajaDetalle]
+
+class ItemNominaLiquidada(BaseModel):
+    id: int
+    trabajador_id: int
+    trabajador_nombre: str
+    documento: str
+    tipo_pago: str
+    periodo_inicio: date
+    periodo_fin: date
+    total_producido: int
+    monto_produccion: Decimal
+    monto_fijo: Decimal
+    total: Decimal
+    estado: str
+    fecha_pago: Optional[datetime] = None
+
+class ReporteNominasOut(BaseModel):
+    fecha_inicio: date
+    fecha_fin: date
+    total_nominas: int
+    total_pagado: Decimal
+    total_pendiente: Decimal
+    total_general: Decimal
+    nominas: List[ItemNominaLiquidada]
 
 
 # ─────────────────────────────────────────────
@@ -537,6 +589,171 @@ async def reporte_morosidad(
 
 
 # ─────────────────────────────────────────────
+# 5. Reporte de Caja y Métodos Venezolanos
+# ─────────────────────────────────────────────
+@router.get(
+    "/caja",
+    response_model=ReporteCajaOut,
+    dependencies=[Depends(require_role(_ADMIN_ROLES))],
+)
+async def reporte_caja(
+    fecha_inicio: Optional[date] = None,
+    fecha_fin: Optional[date] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """Reporte de ingresos de caja por métodos de pago venezolanos y bancos en el período."""
+    fi, ff = fecha_inicio or _default_range()[0], fecha_fin or _default_range()[1]
+
+    # 1. Pagos a pedidos
+    pagos_res = await db.execute(
+        select(Pago)
+        .options(selectinload(Pago.cliente))
+        .where(and_(Pago.fecha >= fi, Pago.fecha <= ff))
+        .order_by(desc(Pago.fecha), desc(Pago.id))
+    )
+    pagos = pagos_res.scalars().all()
+
+    # 2. Abonos a créditos
+    abonos_res = await db.execute(
+        select(AbonoCredito)
+        .options(selectinload(AbonoCredito.cliente))
+        .where(and_(AbonoCredito.fecha >= fi, AbonoCredito.fecha <= ff))
+        .order_by(desc(AbonoCredito.fecha), desc(AbonoCredito.id))
+    )
+    abonos = abonos_res.scalars().all()
+
+    metodos_map: dict[str, dict] = {}
+    transacciones: List[ItemReporteCajaDetalle] = []
+    total_usd = Decimal("0.00")
+    total_bs = Decimal("0.00")
+
+    def _procesar_tx(tx_id, tipo, fecha, cliente_nombre, pedido_id, m_usd, m_bs, tasa, mon, met, banco, ref):
+        nonlocal total_usd, total_bs
+        u = Decimal(str(m_usd or 0))
+        b = Decimal(str(m_bs or 0))
+        total_usd += u
+        total_bs += b
+
+        met_str = met.value if hasattr(met, "value") else str(met or "otro")
+        if met_str not in metodos_map:
+            metodos_map[met_str] = {
+                "metodo": met_str,
+                "total_usd": Decimal("0.00"),
+                "total_bs": Decimal("0.00"),
+                "cantidad_transacciones": 0,
+            }
+        metodos_map[met_str]["total_usd"] += u
+        metodos_map[met_str]["total_bs"] += b
+        metodos_map[met_str]["cantidad_transacciones"] += 1
+
+        transacciones.append(ItemReporteCajaDetalle(
+            id=tx_id,
+            tipo=tipo,
+            fecha=fecha,
+            cliente_nombre=cliente_nombre,
+            pedido_id=pedido_id,
+            monto_usd=u,
+            monto_bs=b,
+            tasa_cambio=Decimal(str(tasa or 1)),
+            moneda_pago=mon.value if hasattr(mon, "value") else str(mon or "USD"),
+            metodo=met_str,
+            banco=banco,
+            referencia=ref,
+        ))
+
+    for p in pagos:
+        c_nombre = p.cliente.nombre if p.cliente else "—"
+        _procesar_tx(p.id, "pago_pedido", p.fecha, c_nombre, p.pedido_id, p.monto_usd, p.monto_bs, p.tasa_cambio, p.moneda_pago, p.metodo, p.banco, p.referencia)
+
+    for a in abonos:
+        c_nombre = a.cliente.nombre if a.cliente else "—"
+        _procesar_tx(a.id, "abono_credito", a.fecha, c_nombre, a.pedido_id, a.monto_usd, a.monto_bs, a.tasa_cambio, a.moneda_pago, a.metodo, a.banco, a.referencia)
+
+    # Ordenar transacciones por fecha descendente
+    transacciones.sort(key=lambda x: x.fecha, reverse=True)
+
+    return ReporteCajaOut(
+        fecha_inicio=fi,
+        fecha_fin=ff,
+        total_recaudado_usd=total_usd,
+        total_recaudado_bs=total_bs,
+        por_metodo=[
+            ItemReporteCajaMetodo(**v)
+            for v in sorted(metodos_map.values(), key=lambda x: x["total_usd"], reverse=True)
+        ],
+        transacciones=transacciones,
+    )
+
+
+# ─────────────────────────────────────────────
+# 6. Reporte de Nóminas Liquidadas
+# ─────────────────────────────────────────────
+@router.get(
+    "/nominas",
+    response_model=ReporteNominasOut,
+    dependencies=[Depends(require_role(_ADMIN_ROLES))],
+)
+async def reporte_nominas(
+    fecha_inicio: Optional[date] = None,
+    fecha_fin: Optional[date] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """Reporte de nóminas liquidadas y costos laborales en el período."""
+    fi, ff = fecha_inicio or _default_range()[0], fecha_fin or _default_range()[1]
+
+    nom_res = await db.execute(
+        select(Nomina)
+        .options(selectinload(Nomina.trabajador))
+        .where(
+            and_(
+                Nomina.periodo_inicio >= fi,
+                Nomina.periodo_fin <= ff,
+            )
+        )
+        .order_by(desc(Nomina.periodo_inicio), desc(Nomina.id))
+    )
+    nominas = nom_res.scalars().all()
+
+    total_pagado = Decimal("0.00")
+    total_pendiente = Decimal("0.00")
+    items: List[ItemNominaLiquidada] = []
+
+    for n in nominas:
+        tot = Decimal(str(n.total or 0))
+        est = n.estado.value if hasattr(n.estado, "value") else str(n.estado)
+        if est == "pagado":
+            total_pagado += tot
+        else:
+            total_pendiente += tot
+
+        items.append(ItemNominaLiquidada(
+            id=n.id,
+            trabajador_id=n.trabajador_id,
+            trabajador_nombre=n.trabajador.nombre if n.trabajador else "—",
+            documento=n.trabajador.documento if n.trabajador else "—",
+            tipo_pago=n.tipo.value if hasattr(n.tipo, "value") else str(n.tipo),
+            periodo_inicio=n.periodo_inicio,
+            periodo_fin=n.periodo_fin,
+            total_producido=n.total_producido,
+            monto_produccion=Decimal(str(n.monto_produccion or 0)),
+            monto_fijo=Decimal(str(n.monto_fijo or 0)),
+            total=tot,
+            estado=est,
+            fecha_pago=n.fecha_pago,
+        ))
+
+    return ReporteNominasOut(
+        fecha_inicio=fi,
+        fecha_fin=ff,
+        total_nominas=len(nominas),
+        total_pagado=total_pagado,
+        total_pendiente=total_pendiente,
+        total_general=total_pagado + total_pendiente,
+        nominas=items,
+    )
+
+
+# ─────────────────────────────────────────────
 # 5. Exportaciones CSV
 # ─────────────────────────────────────────────
 
@@ -659,3 +876,82 @@ async def exportar_morosidad_csv(
     ]
     hoy = date.today()
     return _csv_response(rows, headers, f"morosidad_{hoy}.csv")
+
+
+@router.get(
+    "/caja/csv",
+    dependencies=[Depends(require_role(_ADMIN_ROLES))],
+    response_class=StreamingResponse,
+)
+async def exportar_caja_csv(
+    fecha_inicio: Optional[date] = None,
+    fecha_fin: Optional[date] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """Exporta el reporte de caja y transacciones en formato CSV."""
+    data = await reporte_caja(fecha_inicio, fecha_fin, db)
+    rows = [
+        [
+            t.id,
+            t.tipo,
+            str(t.fecha),
+            t.cliente_nombre,
+            t.pedido_id or "",
+            float(t.monto_usd),
+            float(t.monto_bs),
+            float(t.tasa_cambio),
+            t.moneda_pago,
+            t.metodo,
+            t.banco or "",
+            t.referencia or "",
+        ]
+        for t in data.transacciones
+    ]
+    headers = [
+        "ID", "Tipo", "Fecha", "Cliente", "ID Pedido",
+        "Monto USD", "Monto Bs", "Tasa Cambio", "Moneda Pago",
+        "Método", "Banco", "Referencia",
+    ]
+    fi = fecha_inicio or _default_range()[0]
+    ff = fecha_fin or _default_range()[1]
+    return _csv_response(rows, headers, f"caja_{fi}_{ff}.csv")
+
+
+@router.get(
+    "/nominas/csv",
+    dependencies=[Depends(require_role(_ADMIN_ROLES))],
+    response_class=StreamingResponse,
+)
+async def exportar_nominas_csv(
+    fecha_inicio: Optional[date] = None,
+    fecha_fin: Optional[date] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """Exporta el reporte de nóminas liquidadas en formato CSV."""
+    data = await reporte_nominas(fecha_inicio, fecha_fin, db)
+    rows = [
+        [
+            n.id,
+            n.trabajador_nombre,
+            n.documento,
+            n.tipo_pago,
+            str(n.periodo_inicio),
+            str(n.periodo_fin),
+            n.total_producido,
+            float(n.monto_produccion),
+            float(n.monto_fijo),
+            float(n.total),
+            n.estado,
+            str(n.fecha_pago) if n.fecha_pago else "",
+        ]
+        for n in data.nominas
+    ]
+    headers = [
+        "ID Nómina", "Trabajador", "Documento", "Tipo Pago",
+        "Período Inicio", "Período Fin", "Piezas Producidas",
+        "Monto Producción", "Monto Fijo", "Total USD", "Estado", "Fecha Pago",
+    ]
+    fi = fecha_inicio or _default_range()[0]
+    ff = fecha_fin or _default_range()[1]
+    return _csv_response(rows, headers, f"nominas_{fi}_{ff}.csv")
+

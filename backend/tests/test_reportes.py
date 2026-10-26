@@ -232,6 +232,68 @@ async def test_exportar_csv_ventas(client: AsyncClient, create_test_users):
 
 
 @pytest.mark.asyncio
+async def test_reporte_caja_estructura(client: AsyncClient, create_test_users):
+    """Verifica que el reporte de caja venezolano retorne la estructura esperada."""
+    admin_res = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@test.com", "password": "adminpass"},
+    )
+    admin_token = admin_res.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    res = await client.get("/api/v1/reportes/caja", headers=admin_headers)
+    assert res.status_code == 200
+    data = res.json()
+
+    required = ["fecha_inicio", "fecha_fin", "total_recaudado_usd", "total_recaudado_bs", "por_metodo", "transacciones"]
+    for field in required:
+        assert field in data, f"Faltante: {field}"
+
+    assert isinstance(data["por_metodo"], list)
+    assert isinstance(data["transacciones"], list)
+
+
+@pytest.mark.asyncio
+async def test_reporte_nominas_estructura(client: AsyncClient, create_test_users):
+    """Verifica que el reporte de nóminas retorne la estructura esperada."""
+    admin_res = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@test.com", "password": "adminpass"},
+    )
+    admin_token = admin_res.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    res = await client.get("/api/v1/reportes/nominas", headers=admin_headers)
+    assert res.status_code == 200
+    data = res.json()
+
+    required = ["fecha_inicio", "fecha_fin", "total_nominas", "total_pagado", "total_pendiente", "total_general", "nominas"]
+    for field in required:
+        assert field in data, f"Faltante: {field}"
+
+    assert isinstance(data["nominas"], list)
+
+
+@pytest.mark.asyncio
+async def test_exportar_csv_caja_y_nominas(client: AsyncClient, create_test_users):
+    """Verifica que las exportaciones CSV de caja y nóminas retornen text/csv."""
+    admin_res = await client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@test.com", "password": "adminpass"},
+    )
+    admin_token = admin_res.json()["access_token"]
+    admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
+    res_caja = await client.get("/api/v1/reportes/caja/csv", headers=admin_headers)
+    assert res_caja.status_code == 200
+    assert "text/csv" in res_caja.headers.get("content-type", "")
+
+    res_nom = await client.get("/api/v1/reportes/nominas/csv", headers=admin_headers)
+    assert res_nom.status_code == 200
+    assert "text/csv" in res_nom.headers.get("content-type", "")
+
+
+@pytest.mark.asyncio
 async def test_reportes_bloqueados_para_vendedor(client: AsyncClient, create_test_users):
     """Verifica que los reportes estén restringidos a administrador y superusuario."""
     vendedor_res = await client.post(
@@ -241,7 +303,14 @@ async def test_reportes_bloqueados_para_vendedor(client: AsyncClient, create_tes
     token = vendedor_res.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    for endpoint in ["/api/v1/reportes/ventas", "/api/v1/reportes/produccion",
-                     "/api/v1/reportes/rentabilidad", "/api/v1/reportes/morosidad"]:
+    for endpoint in [
+        "/api/v1/reportes/ventas",
+        "/api/v1/reportes/produccion",
+        "/api/v1/reportes/rentabilidad",
+        "/api/v1/reportes/morosidad",
+        "/api/v1/reportes/caja",
+        "/api/v1/reportes/nominas",
+    ]:
         res = await client.get(endpoint, headers=headers)
         assert res.status_code == 403, f"Endpoint {endpoint} debería retornar 403 para vendedor"
+

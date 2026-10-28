@@ -17,8 +17,10 @@ import Produccion from './pages/Produccion';
 import Trabajadores from './pages/Trabajadores';
 import Tesoreria from './pages/Tesoreria';
 import Reportes from './pages/Reportes';
+import Configuracion from './pages/Configuracion';
 import PortalTrabajador from './pages/PortalTrabajador';
 import NotFound from './pages/NotFound';
+import { useConfiguracionStore } from './store/configuracionStore';
 
 // Componente placeholder para módulos de las próximas semanas
 function PlaceholderModule({ title, week, desc, icon }) {
@@ -46,6 +48,11 @@ function PlaceholderModule({ title, week, desc, icon }) {
 
 export default function App() {
   const { fetchCurrentUser, isAuthenticated } = useAuthStore();
+  const { cargarConfiguracion } = useConfiguracionStore();
+
+  useEffect(() => {
+    cargarConfiguracion();
+  }, [cargarConfiguracion]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -97,6 +104,7 @@ export default function App() {
           <Route path="/trabajadores" element={<Trabajadores />} />
           <Route path="/tesoreria" element={<Tesoreria />} />
           <Route path="/reportes" element={<Reportes />} />
+          <Route path="/configuracion" element={<Configuracion />} />
         </Route>
 
         {/* 404 */}

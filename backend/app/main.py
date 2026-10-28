@@ -24,6 +24,7 @@ from app.models import (
     Pago,
     AbonoCredito,
     TasaCambio,
+    ConfiguracionEmpresa,
 )
 from app.api.v1.router import api_router
 

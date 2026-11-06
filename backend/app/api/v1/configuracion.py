@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict
@@ -96,7 +96,7 @@ async def actualizar_configuracion(
         if value is not None:
             setattr(config, key, value)
 
-    config.updated_at = datetime.utcnow()
+    config.updated_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(config)
     return config
@@ -114,7 +114,7 @@ async def restablecer_predeterminados(db: AsyncSession = Depends(get_db)):
     for key, value in DEFAULT_CONFIG.items():
         setattr(config, key, value)
 
-    config.updated_at = datetime.utcnow()
+    config.updated_at = datetime.now(timezone.utc)
     await db.commit()
     await db.refresh(config)
     return config
